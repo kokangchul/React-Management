@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Customer from "./components/Customer";
+import Stack from "@mui/material/Stack";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   Table,
   TableHead,
@@ -20,11 +22,29 @@ const callApi = async () => {
 
 const App = () => {
   const [customers, setCustomers] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    const intervalId = setInterval(() => {
+      setProgress((prevProgress) =>
+        prevProgress >= 100 ? 0 : prevProgress + 5
+      );
+    }, 100);
     callApi()
-      .then((res) => setCustomers(res))
-      .catch((err) => console.log(err));
+      .then((res) => {
+        setCustomers(res);
+        clearInterval(intervalId);
+        setLoading(false);
+      })
+      .catch((err) => {
+        clearInterval(intervalId);
+        setLoading(false);
+      });
+
+    return () => clearInterval(intervalId);
   }, []);
+
   return (
     <Paper sx={{ width: "100%", marginTop: 3, overflowX: "auto" }}>
       <Table sx={{ minWidth: 1080 }}>
@@ -39,17 +59,33 @@ const App = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {customers.map((c) => (
-            <Customer
-              key={c.id}
-              id={c.id}
-              image={c.image}
-              name={c.name}
-              birthday={c.birthday}
-              gender={c.gender}
-              job={c.job}
-            />
-          ))}
+          {!loading ? (
+            customers.map((c) => (
+              <Customer
+                key={c.id}
+                id={c.id}
+                image={c.image}
+                name={c.name}
+                birthday={c.birthday}
+                gender={c.gender}
+                job={c.job}
+              />
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={6}>
+                <Stack
+                  spacing={2}
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ height: "100px" }}
+                >
+                  <CircularProgress variant="determinate" value={progress} />
+                </Stack>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </Paper>
