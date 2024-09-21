@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Customer from "./components/Customer";
+import CustomerAdd from "./components/CustomerAdd";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
 import {
@@ -25,7 +26,10 @@ const App = () => {
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const stateRefresh = () => {
+    setCustomers([]);
+    setProgress(0);
+    setLoading(true);
     const intervalId = setInterval(() => {
       setProgress((prevProgress) =>
         prevProgress >= 100 ? 0 : prevProgress + 5
@@ -43,52 +47,59 @@ const App = () => {
       });
 
     return () => clearInterval(intervalId);
+  };
+
+  useEffect(() => {
+    stateRefresh();
   }, []);
 
   return (
-    <Paper sx={{ width: "100%", marginTop: 3, overflowX: "auto" }}>
-      <Table sx={{ minWidth: 1080 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell>번호</TableCell>
-            <TableCell>이미지</TableCell>
-            <TableCell>이름</TableCell>
-            <TableCell>생년월일</TableCell>
-            <TableCell>성별</TableCell>
-            <TableCell>직업</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {!loading ? (
-            customers.map((c) => (
-              <Customer
-                key={c.id}
-                id={c.id}
-                image={c.image}
-                name={c.name}
-                birthday={c.birthday}
-                gender={c.gender}
-                job={c.job}
-              />
-            ))
-          ) : (
+    <div>
+      <Paper sx={{ width: "100%", marginTop: 3, overflowX: "auto" }}>
+        <Table sx={{ minWidth: 1080 }}>
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={6}>
-                <Stack
-                  spacing={2}
-                  direction="row"
-                  justifyContent="center"
-                  alignItems="center"
-                  sx={{ height: "100px" }}
-                >
-                  <CircularProgress variant="determinate" value={progress} />
-                </Stack>
-              </TableCell>
+              <TableCell>번호</TableCell>
+              <TableCell>이미지</TableCell>
+              <TableCell>이름</TableCell>
+              <TableCell>생년월일</TableCell>
+              <TableCell>성별</TableCell>
+              <TableCell>직업</TableCell>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </Paper>
+          </TableHead>
+          <TableBody>
+            {!loading ? (
+              customers.map((c) => (
+                <Customer
+                  key={c.id}
+                  id={c.id}
+                  image={c.image}
+                  name={c.name}
+                  birthday={c.birthday}
+                  gender={c.gender}
+                  job={c.job}
+                />
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6}>
+                  <Stack
+                    spacing={2}
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                    sx={{ height: "100px" }}
+                  >
+                    <CircularProgress variant="determinate" value={progress} />
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Paper>
+      <CustomerAdd stateRefresh={stateRefresh} />
+    </div>
   );
 };
 
