@@ -30,6 +30,14 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING(64),
         allowNull: false,
       },
+      createdDate: {
+        type: DataTypes.DATE(),
+        allowNull: false,
+      },
+      isDeleted: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
     },
     {
       sequelize,

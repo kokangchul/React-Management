@@ -41,6 +41,10 @@ async function launchServer() {
     customerController.insert(req, res);
   });
 
+  app.delete("/api/customers/:id", (req, res) => {
+    customerController.remove(req, res);
+  });
+
   try {
     await sequelize.sync();
     console.log("Database is ready!");

@@ -65,12 +65,14 @@ const App = () => {
               <TableCell>생년월일</TableCell>
               <TableCell>성별</TableCell>
               <TableCell>직업</TableCell>
+              <TableCell>설정</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {!loading ? (
               customers.map((c) => (
                 <Customer
+                  stateRefresh={stateRefresh}
                   key={c.id}
                   id={c.id}
                   image={c.image}
@@ -82,7 +84,7 @@ const App = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={7}>
                   <Stack
                     spacing={2}
                     direction="row"

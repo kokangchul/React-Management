@@ -1,5 +1,6 @@
 import React from "react";
 import { TableRow, TableCell } from "@mui/material";
+import CustomerDelete from "./CustomerDelete";
 
 class Customer extends React.Component {
   render() {
@@ -13,6 +14,12 @@ class Customer extends React.Component {
         <TableCell>{this.props.birthday}</TableCell>
         <TableCell>{this.props.gender}</TableCell>
         <TableCell>{this.props.job}</TableCell>
+        <TableCell>
+          <CustomerDelete
+            stateRefresh={this.props.stateRefresh}
+            id={this.props.id}
+          />
+        </TableCell>
       </TableRow>
     );
   }
