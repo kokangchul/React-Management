@@ -3,6 +3,17 @@ import Customer from "./components/Customer";
 import CustomerAdd from "./components/CustomerAdd";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
+import { styled, alpha } from "@mui/material/styles";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import InputBase from "@mui/material/InputBase";
+import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
+import { makeStyles } from "@mui/styles";
+
 import {
   Table,
   TableHead,
@@ -21,13 +32,84 @@ const callApi = async () => {
   return body;
 };
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: "100%",
+    minWidth: 1080,
+  },
+  paper: {
+    marginLeft: 18,
+    marginRight: 18,
+  },
+  menu: {
+    marginTop: 15,
+    marginBottom: 15,
+    display: "flex",
+    justifyContent: "center",
+  },
+}));
+
+const Search = styled("div")(({ theme }) => ({
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(1),
+    width: "auto",
+  },
+}));
+
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  width: "100%",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create("width"),
+    [theme.breakpoints.up("sm")]: {
+      width: "12ch",
+      "&:focus": {
+        width: "20ch",
+      },
+    },
+  },
+}));
+
 const App = () => {
+  const classes = useStyles();
   const [customers, setCustomers] = useState([]);
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const cellList = [
+    "번호",
+    "이미지",
+    "이름",
+    "생년월일",
+    "성별",
+    "직업",
+    "설정",
+  ];
 
   const stateRefresh = () => {
     setCustomers([]);
+    setSearchKeyword("");
     setProgress(0);
     setLoading(true);
     const intervalId = setInterval(() => {
@@ -49,39 +131,83 @@ const App = () => {
     return () => clearInterval(intervalId);
   };
 
+  const handleValueChange = (e) => {
+    const keyword = e.target.value;
+    setSearchKeyword(keyword);
+  };
+
   useEffect(() => {
     stateRefresh();
   }, []);
 
+  const filteredComponents = (data) => {
+    data = data.filter((c) => c.name.indexOf(searchKeyword) > -1);
+    return data.map((c) => {
+      return (
+        <Customer
+          stateRefresh={stateRefresh}
+          key={c.id}
+          id={c.id}
+          image={c.image}
+          name={c.name}
+          birthday={c.birthday}
+          gender={c.gender}
+          job={c.job}
+        />
+      );
+    });
+  };
+
   return (
-    <div>
-      <Paper sx={{ width: "100%", marginTop: 3, overflowX: "auto" }}>
+    <div sx={classes.root}>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
+          >
+            고객 관리 시스템
+          </Typography>
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="검색하기"
+              inputProps={{ "aria-label": "search" }}
+              name="searchKeyword"
+              value={searchKeyword}
+              onChange={handleValueChange}
+            />
+          </Search>
+        </Toolbar>
+      </AppBar>
+      <div className={classes.menu}>
+        <CustomerAdd stateRefresh={stateRefresh} />
+      </div>
+      <Paper className={classes.paper}>
         <Table sx={{ minWidth: 1080 }}>
           <TableHead>
             <TableRow>
-              <TableCell>번호</TableCell>
-              <TableCell>이미지</TableCell>
-              <TableCell>이름</TableCell>
-              <TableCell>생년월일</TableCell>
-              <TableCell>성별</TableCell>
-              <TableCell>직업</TableCell>
-              <TableCell>설정</TableCell>
+              {cellList.map((c) => {
+                return <TableCell className={classes.tableHead}>{c}</TableCell>;
+              })}
             </TableRow>
           </TableHead>
           <TableBody>
             {!loading ? (
-              customers.map((c) => (
-                <Customer
-                  stateRefresh={stateRefresh}
-                  key={c.id}
-                  id={c.id}
-                  image={c.image}
-                  name={c.name}
-                  birthday={c.birthday}
-                  gender={c.gender}
-                  job={c.job}
-                />
-              ))
+              filteredComponents(customers)
             ) : (
               <TableRow>
                 <TableCell colSpan={7}>
@@ -100,7 +226,6 @@ const App = () => {
           </TableBody>
         </Table>
       </Paper>
-      <CustomerAdd stateRefresh={stateRefresh} />
     </div>
   );
 };
